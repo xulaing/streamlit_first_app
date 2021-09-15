@@ -1,7 +1,5 @@
-import seaborn as sns
-import altair as alt
 import streamlit as st
-# importing numpy and pandas for to work with sample data.
+import altair as alt
 import numpy as np
 import pandas as pd
 import time
@@ -38,6 +36,7 @@ def count_rows(rows):
     return len(rows)
 
 
+# Innitialisation de toutes les variables à afficher pour uber-raw-data.csv
 df = pd.read_csv("uber-raw-data-apr14.csv")
 dt = pd.to_datetime(df['Date/Time'], format='%m/%d/%Y %H:%M:%S')
 dt_frame = dt.to_frame()
@@ -51,6 +50,7 @@ dt_grouped = dt_frame.groupby(['weekday', 'hour']).apply(
 dt_map = dt_frame[['Lat', 'Lon']].copy()
 dt_map.rename(columns={'Lat': 'lat', 'Lon': 'lon'}, inplace=True)
 
+# Innitialisation de toutes les variables à afficher pour ny-trips-data.csv
 dt_trips = pd.read_csv("ny-trips-data.csv")
 dt_trips[['tpep_pickup_datetime', 'tpep_dropoff_datetime']] = dt_trips[[
     'tpep_pickup_datetime', 'tpep_dropoff_datetime']].apply(pd.to_datetime)
@@ -72,14 +72,20 @@ dt_map_trips2 = dt_trips[['dropoff_latitude', 'dropoff_longitude']].copy()
 dt_map_trips2.rename(
     columns={'dropoff_latitude': 'lat', 'dropoff_longitude': 'lon'}, inplace=True)
 
+# sidebar to select which dataset to display
 option = st.sidebar.selectbox(
     'Which dataset do you want to display ?',
     ('Uber', 'Trips'))
 
 if option == 'Uber':
+    # uber-raw-data
     st.write("Uber Raw Data - Apr 2014")
+
+    # display the dataset
     expander = st.expander("Dataset")
     expander.write(dt_frame)
+
+    # display an histogram of the frequency by dom
     expander = st.expander("Frequency by date of month")
     fig_dom, ax_dom = plt.subplots()
     ax_dom.hist(dt_frame["dom"], bins=30, rwidth=0.8, range=(0.5, 30.5))
@@ -87,6 +93,8 @@ if option == 'Uber':
     plt.ylabel('Frequency')
     plt.title('Frequency by DoM - Uber - April 2014')
     expander.pyplot(fig_dom)
+
+    # display an histogram of the frequency by hour
     expander = st.expander("Frequency by hour")
     fig_hour, ax_hour = plt.subplots()
     ax_hour.hist(dt_frame["hour"], bins=24, range=(0.5, 24))
@@ -94,6 +102,8 @@ if option == 'Uber':
     plt.ylabel('Frequency')
     plt.title('Frequency by hour - Uber - April 2014')
     expander.pyplot(fig_hour)
+
+    # display an histogram of the frequency by weekday
     expander = st.expander("Frequency by week")
     fig_week, ax_week = plt.subplots()
     ax_week.hist(dt_frame["weekday"], bins=7, rwidth=0.8, range=(-0.5, 6.5))
@@ -103,17 +113,25 @@ if option == 'Uber':
     plt.xticks([0, 1, 2, 3, 4, 5, 6], ['Mon', 'Tue',
                                        'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
     expander.pyplot(fig_week)
+
+    # display a heatmap of the frequency by hour
     expander = st.expander("Frequency by hour in a week")
     fig, ax = plt.subplots()
     ax = sns.heatmap(dt_grouped)
     plt.title('Frequency by hour in a week - Uber - April 2014')
     expander.pyplot(fig)
+
     st.title("Map of Uber")
     st.map(dt_map)
 elif option == 'Trips':
+    # ny-trips-data
     st.write("NY Trips Data - Jan 2015")
+
+    # display the dataset
     expander = st.expander("Dataset")
     expander.write(dt_trips)
+
+    # display an histogram of the frequency by dom
     expander = st.expander("Frequency by date of month")
     fig_dom, ax_dom = plt.subplots()
     ax_dom.hist(dt_trips["dom_pickup"], bins=30, rwidth=0.8, range=(15, 16))
@@ -122,6 +140,8 @@ elif option == 'Trips':
     plt.ylabel('Frequency')
     plt.title('Frequency by DoM - Trips - January 2015')
     expander.pyplot(fig_dom)
+
+    # display an histogram of the frequency by hour
     expander = st.expander("Frequency by hour")
     fig_hour, ax_hour = plt.subplots()
     ax_hour.hist(dt_trips["hour_pickup"], bins=24, range=(0.5, 24))
@@ -130,6 +150,8 @@ elif option == 'Trips':
     plt.ylabel('Frequency')
     plt.title('Frequency by hour - Trips - January 2015')
     expander.pyplot(fig_hour)
+
+    # display an histogram of the frequency by weekday
     expander = st.expander("Frequency by week")
     fig_week, ax_week = plt.subplots()
     ax_week.hist(dt_trips["weekday_pickup"], bins=2,
@@ -141,12 +163,14 @@ elif option == 'Trips':
     plt.title('Frequency by weekday - Trips - January 2015')
     plt.xticks([2, 3, 4], ['Wed', 'Thu', 'Fri'])
     expander.pyplot(fig_week)
+
+    # display an heatmap of the frequency by hour
     expander = st.expander("Frequency by hour in a week")
     fig, ax = plt.subplots()
     ax = sns.heatmap(dt_trips_grouped)
     plt.title('Frequency by hour in a week - Trips - Jan 2015')
     expander.pyplot(fig)
-    st.error('Can not display twiny(), wait for update 😥')
+
     st.title("Map of Ubers - Pickup")
     st.map(dt_map_trips1)
     st.title("Map of Ubers - Dropoff")
