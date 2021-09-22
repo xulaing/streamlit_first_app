@@ -3,6 +3,4 @@ streamlit==0.81
 altair 
 numpy
 pandas 
-time
-matplotlib.pyplot 
 seaborn 
